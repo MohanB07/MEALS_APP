@@ -1,10 +1,11 @@
 import Meal from '../models/meal'; // Ensure this path is correct
 
+const BASE_URL = "http://192.168.1.8:5000/FOOD-ZONE/";
 // Function to fetch meals by category
 export const fetchMealsByCategory = async (categoryId) => {
   try {
     const ipAddress = "192.168.1.143"; // Update to your server's IP address
-    const response = await fetch(`http://${ipAddress}:3000/meals?categoryId=${categoryId}`);
+    const response = await fetch(`${BASE_URL}meals?categoryId=${categoryId}`);
     if (!response.ok) {
       throw new Error('Network response was not ok');
     }
@@ -30,7 +31,7 @@ export const fetchMealsByCategory = async (categoryId) => {
 export const fetchWalletBalance = async () => {
   try {
     const ipAddress = "192.168.1.143"; // Update to your server's IP address
-    const response = await fetch(`http://${ipAddress}:3000/wallet`);
+    const response = await fetch(`${BASE_URL}wallet`);
     if (!response.ok) {
       const errorText = await response.text();
       throw new Error(`Network response was not ok. Status: ${response.status}. Error: ${errorText}`);

@@ -50,7 +50,7 @@ import Colours from '../utils/Colors';
         const { login, signup } = useGlobalContext();
     
         const handleLogin = async () => {
-        await Navigation.navigate('MealDescription');
+        await Navigation.navigate('MealsCategory');
         };
     
         useEffect(() => {

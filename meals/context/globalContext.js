@@ -2,7 +2,7 @@ import axios from 'axios';
 import React, { createContext, useContext, useState } from 'react';
 
 
-const BASE_URL = "http://192.168.102.81:5000/FOOD-ZONE/";
+const BASE_URL = "http://192.168.1.8:5000/FOOD-ZONE/";
 
 const GlobalContext = createContext();
 

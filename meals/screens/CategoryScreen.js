@@ -7,7 +7,8 @@ import Category from '../server/models/category';
 const fetchCategories = async () => {
   //const ipAddress = getLocalIPAddress();
   const ipAddress = "192.168.100.5"; // Corrected the IP address format
-  const url = `http://${ipAddress}:3000/categories`;
+  const BASE_URL = "http://192.168.1.8:5000/FOOD-ZONE/";
+  const url = `${BASE_URL}categories`;
   const response = await fetch(url);
   const data = await response.json();
   return data.map(item => new Category(item.id, item.title, item.color));
