@@ -1,4 +1,4 @@
-    import {
+import {
     Manrope_200ExtraLight,
     Manrope_300Light,
     Manrope_400Regular,
@@ -24,14 +24,14 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
-    View,
+    View
 } from 'react-native';
 import PsgButton from '../components/PsgButton';
 import { useGlobalContext } from '../context/globalContext';
 import Colours from '../utils/Colors';
-    
-    const HomeScreen = () => {
-        let [fontsLoaded] = useFonts({
+
+const HomeScreen = () => {
+    let [fontsLoaded] = useFonts({
         Manrope_200ExtraLight,
         Manrope_300Light,
         Manrope_400Regular,
@@ -39,48 +39,56 @@ import Colours from '../utils/Colors';
         Manrope_600SemiBold,
         Manrope_700Bold,
         Manrope_800ExtraBold,
-        });
+    });
+
+    const Navigation = useNavigation();
+    const [modalVisible, setModalVisible] = useState(false);
+    const [collegeID, setCollegeID] = useState(null);
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     
-        const Navigation = useNavigation();
-        const [modalVisible, setModalVisible] = useState(false);
-        const [collegeID, setCollegeID] = useState('');
-        const [password, setPassword] = useState('');
-        const [confirmPassword, setConfirmPassword] = useState('');
-        
-        const { login, signup } = useGlobalContext();
-    
-        const handleLogin = async () => {
-        await Navigation.navigate('MealsCategory');
-        };
-    
-        useEffect(() => {
+    const { login, signup, captureUserId } = useGlobalContext();
+
+    const handleLogin = async () => {
+        captureUserId(collegeID);
+        await Navigation.navigate('MealsCategory', {collegeID});
+    };
+
+    useEffect(() => {
         const checkSession = async () => {
             try {
-            const savedCollegeID = await AsyncStorage.getItem('collegeID');
-            const savedPassword = await AsyncStorage.getItem('password');
-            if (savedCollegeID && savedPassword) {
-                const valid = await login(savedCollegeID, savedPassword);
-                if (valid === true) {
-                handleLogin();
+                const savedCollegeID = await AsyncStorage.getItem('collegeID');
+                const savedPassword = await AsyncStorage.getItem('password');
+                if (savedCollegeID && savedPassword) {
+                    const valid = await login(savedCollegeID, savedPassword);
+                    if (valid === true) {
+                        setCollegeID(savedCollegeID);
+                    }
                 }
-            }
             } catch (error) {
-            console.error(error);
+                console.error(error);
             }
         };
-    
+
         checkSession();
-        }, []);
-    
-        if (!fontsLoaded) {
-        return null;
+    }, []);
+
+    useEffect(() => {
+        if (collegeID) {
+            captureUserId(collegeID);
+            handleLogin();
         }
-    
-        const toggleModal = () => {
+    }, [collegeID]);
+
+    if (!fontsLoaded) {
+        return null;
+    }
+
+    const toggleModal = () => {
         setModalVisible(!modalVisible);
-        };
-    
-        const validateLogin = async () => {
+    };
+
+    const validateLogin = async () => {
         if (!collegeID || !password) {
             alert('Please enter both College ID and Password.');
             return;
@@ -95,19 +103,19 @@ import Colours from '../utils/Colors';
         } else {
             alert("User doesn't exist");
         }
-        };
-    
-        const createUser = async () => {
+    };
+
+    const createUser = async () => {
         if (!collegeID || !password || !confirmPassword) {
             alert('Please fill all the fields.');
             return;
         }
-    
+
         if (password !== confirmPassword) {
             alert('Passwords do not match.');
             return;
         }
-    
+
         const valid = await signup(collegeID, password);
         if (valid === true) {
             await AsyncStorage.setItem('collegeID', collegeID);
@@ -119,108 +127,109 @@ import Colours from '../utils/Colors';
         } else {
             alert('Signup failed. Please try again.');
         }
-        };
-    
-        return (
+    };
+
+    return (
         <SafeAreaView style={styles.safeArea}>
             <StatusBar backgroundColor={Colours.WhiteBlue200} barStyle="dark-content" />
             <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
-            <KeyboardAvoidingView
-                style={styles.container}
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                enabled={false}
-            >
-                <ImageBackground
-                source={require('../assets/images/psg.jpg')}
-                style={styles.backgroundContainer}
-                imageStyle={styles.backgroundImage}
+                <KeyboardAvoidingView
+                    style={styles.container}
+                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                    enabled={false}
                 >
-                <View style={styles.contentContainer}>
-                    <View style={styles.cardTransparentContainer}></View>
-                    <View style={styles.cardOpaqueContainer}>
-                    <Text style={styles.cardTitleText}>Log into Food Zone</Text>
-                    <View style={styles.loginBox}>
-                        <TextInput
-                        style={styles.loginText}
-                        placeholder="college ID"
-                        value={collegeID}
-                        onChangeText={setCollegeID}
-                        />
-                        <TextInput
-                        style={styles.loginText}
-                        placeholder="Password"
-                        secureTextEntry
-                        value={password}
-                        onChangeText={setPassword}
-                        />
+                    <ImageBackground
+                        source={require('../assets/images/psg.jpg')}
+                        style={styles.backgroundContainer}
+                        imageStyle={styles.backgroundImage}
+                    >
+                        <View style={styles.contentContainer}>
+                            <View style={styles.cardTransparentContainer}></View>
+                            <View style={styles.cardOpaqueContainer}>
+                                <Text style={styles.cardTitleText}>Log into Food Zone</Text>
+                                <View style={styles.loginBox}>
+                                    <TextInput
+                                        style={styles.loginText}
+                                        placeholder="college ID"
+                                        value={collegeID}
+                                        onChangeText={setCollegeID}
+                                    />
+                                    <TextInput
+                                        style={styles.loginText}
+                                        placeholder="Password"
+                                        secureTextEntry
+                                        value={password}
+                                        onChangeText={setPassword}
+                                    />
+                                </View>
+                                <PsgButton title="Login" onPress={validateLogin} />
+                                <Text style={styles.miniText}>
+                                    Not a registered user?{' '}
+                                    <Text style={styles.signup} onPress={toggleModal}>
+                                        Sign up
+                                    </Text>{' '}
+                                    now!
+                                </Text>
+                            </View>
+                        </View>
+                    </ImageBackground>
+                </KeyboardAvoidingView>
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={modalVisible}
+                    onRequestClose={() => setModalVisible(false)}
+                >
+                    <View style={styles.modalBackground}>
+                        <View style={styles.modalContainer}>
+                            <TouchableOpacity style={styles.closeButton} onPress={toggleModal}>
+                                <Ionicons name="close-circle-outline" size={32} style={styles.closeButtonText} />
+                            </TouchableOpacity>
+                            <Text style={styles.modalTitle}>Sign Up</Text>
+                            <View style={styles.modalContent}>
+                                <TextInput
+                                    style={styles.loginText}
+                                    placeholder="college ID"
+                                    value={collegeID}
+                                    onChangeText={setCollegeID}
+                                />
+                                <TextInput
+                                    style={styles.loginText}
+                                    placeholder="Password"
+                                    secureTextEntry
+                                    value={password}
+                                    onChangeText={setPassword}
+                                />
+                                <TextInput
+                                    style={styles.loginText}
+                                    placeholder="Confirm Password"
+                                    secureTextEntry
+                                    value={confirmPassword}
+                                    onChangeText={setConfirmPassword}
+                                />
+                                <PsgButton
+                                    style={{ backgroundColor: Colours.DarkBlue100 }}
+                                    textStyle={{ color: 'white', fontWeight: 'bold', fontSize: 20 }}
+                                    title="Sign Up"
+                                    onPress={createUser}
+                                />
+                                <Text style={styles.switchToLoginText}>
+                                    Already have an account?{' '}
+                                    <Text style={styles.switchLink} onPress={toggleModal}>
+                                        Login
+                                    </Text>
+                                </Text>
+                            </View>
+                        </View>
                     </View>
-                    <PsgButton title="Login" onPress={validateLogin} />
-                    <Text style={styles.miniText}>
-                        Not a registered user?{' '}
-                        <Text style={styles.signup} onPress={toggleModal}>
-                        Sign up
-                        </Text>{' '}
-                        now!
-                    </Text>
-                    </View>
-                </View>
-                </ImageBackground>
-            </KeyboardAvoidingView>
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={modalVisible}
-                onRequestClose={() => setModalVisible(false)}
-            >
-                <View style={styles.modalBackground}>
-                <View style={styles.modalContainer}>
-                    <TouchableOpacity style={styles.closeButton} onPress={toggleModal}>
-                    <Ionicons name="close-circle-outline" size={32} style={styles.closeButtonText} />
-                    </TouchableOpacity>
-                    <Text style={styles.modalTitle}>Sign Up</Text>
-                    <View style={styles.modalContent}>
-                    <TextInput
-                        style={styles.loginText}
-                        placeholder="college ID"
-                        value={collegeID}
-                        onChangeText={setCollegeID}
-                    />
-                    <TextInput
-                        style={styles.loginText}
-                        placeholder="Password"
-                        secureTextEntry
-                        value={password}
-                        onChangeText={setPassword}
-                    />
-                    <TextInput
-                        style={styles.loginText}
-                        placeholder="Confirm Password"
-                        secureTextEntry
-                        value={confirmPassword}
-                        onChangeText={setConfirmPassword}
-                    />
-                    <PsgButton
-                        style={{ backgroundColor: Colours.DarkBlue100 }}
-                        textStyle={{ color: 'white', fontWeight: 'bold', fontSize: 20 }}
-                        title="Sign Up"
-                        onPress={createUser}
-                    />
-                    <Text style={styles.switchToLoginText}>
-                        Already have an account?{' '}
-                        <Text style={styles.switchLink} onPress={toggleModal}>
-                        Login
-                        </Text>
-                    </Text>
-                    </View>
-                </View>
-                </View>
-            </Modal>
+                </Modal>
             </ScrollView>
         </SafeAreaView>
-        );
-    };
-    
-    export default HomeScreen;
+    );
+};
+
+export default HomeScreen;
+
     
     const styles = StyleSheet.create({
         safeArea: {

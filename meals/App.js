@@ -9,7 +9,6 @@ import { GlobalProvider } from './context/globalContext';
 import CartScreen from './screens/CartScreen';
 import CategoryScreen from './screens/CategoryScreen';
 import HomeScreen from './screens/HomeScreen';
-import LoginScreen from './screens/LoginScreen';
 import MealsDetailsScreen from './screens/MealsDetailsScreen';
 import OrderSummaryScreen from './screens/OrderSummaryScreen';
 import PSGWalletScreen from './screens/PSGWalletScreen';
@@ -28,7 +27,6 @@ function StackNavigator() {
         contentStyle: { backgroundColor: Colors.WhiteBlue100 },
       }}
     >
-      <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Signup" component={SignupScreen} />
       <Stack.Screen name="MealsCategory" component={CategoryScreen} />
       <Stack.Screen name="MealDescription" component={MealsDetailsScreen} />

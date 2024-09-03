@@ -2,7 +2,8 @@ import { useRoute } from "@react-navigation/native";
 import { useEffect, useLayoutEffect, useState } from "react";
 import { FlatList, ImageBackground, StyleSheet, View } from "react-native";
 import MealItem from "../components/MealItem";
-import { fetchMealsByCategory } from "../server/data/api";
+import { useGlobalContext } from "../context/globalContext";
+
 
 function MealsDetailsScreen({ navigation }) {
     const route = useRoute();
@@ -10,6 +11,8 @@ function MealsDetailsScreen({ navigation }) {
 
     const [meals, setMeals] = useState([]);
     const [cart, setCart] = useState({});
+
+    const { fetchMealsByCategory } = useGlobalContext();
 
     useEffect(() => {
         const fetchMeals = async () => {
@@ -28,7 +31,7 @@ function MealsDetailsScreen({ navigation }) {
 
     useLayoutEffect(() => {
         navigation.setOptions({
-            title: route.params.CategoryTitle, // This needs to be set in navigation or fetched in another way
+            title: route.params.CategoryTitle,
         });
     }, [catId, navigation]);
 

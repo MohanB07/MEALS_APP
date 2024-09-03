@@ -1,14 +1,16 @@
 import axios from 'axios';
 import React, { createContext, useContext, useState } from 'react';
+import Category from '../server/models/category';
+import Meal from '../server/models/meal';
 
-
-const BASE_URL = "http://192.168.1.8:5000/FOOD-ZONE/";
+const BASE_URL = "http://192.168.166.81:5000/FOOD-ZONE/";
 
 const GlobalContext = createContext();
 
 export const GlobalProvider = ({ children }) => {
     const [error, setError] = useState(null);
     const [cart, setCart] = useState({});
+    const [userId, setUserId] = useState(null);
 
     const login = async (regno, pwd) => {
         try {
@@ -74,15 +76,29 @@ export const GlobalProvider = ({ children }) => {
         }
         };
 
-        const fetchWalletBalance = async () => {
+        const fetchWalletBalance = async (userId) => {
             try {
-                const response = await axios.get(`${BASE_URL}wallet`);
+                // console.log("from GC userId : " + userId);
+                const response = await axios.get(`${BASE_URL}wallet`, {
+                    params: { userId }
+                });
                 return response.data.balance;
             } catch (error) {
                 console.error('Network Error:', error);
                 setError('There was a network error. Please try again later.');
             }
         };
+
+        const addWalletAmount = async (amount) => {
+            try {
+                const response = await axios.get(`${BASE_URL}addWalletAmount`, {
+                    amount
+                })
+                return response.data.amount;
+            } catch (error) {
+                
+            }
+        }
 
 
         const fetchCategories = async () => {
@@ -117,9 +133,13 @@ export const GlobalProvider = ({ children }) => {
         const clearCart = () => {
             setCart({});
         };
-    
+        
+        const captureUserId = (thisUser) => {
+            console.log("GC capturing userId " + thisUser);
+            setUserId(thisUser);
+        }
 
-
+            
 
     return (
         <GlobalContext.Provider value={{
@@ -127,17 +147,19 @@ export const GlobalProvider = ({ children }) => {
             signup,
             fetchMealsByCategory,
             fetchWalletBalance,
+            addWalletAmount,
             fetchCategories,
             addToCart,
             removeFromCart,
             clearCart,
+            captureUserId,
             cart,
+            userId,
             error
         }}>
         {children}
         </GlobalContext.Provider>
     );
-
 };
 
 export const useGlobalContext = () => useContext(GlobalContext);

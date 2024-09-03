@@ -1,30 +1,26 @@
+import { useRoute } from "@react-navigation/native";
 import React, { useEffect, useState } from 'react';
 import { FlatList, ImageBackground, StyleSheet, View } from 'react-native';
 import CategoryGridTile from '../components/CategoryGridTile';
-import Category from '../server/models/category';
-
-
-const fetchCategories = async () => {
-  //const ipAddress = getLocalIPAddress();
-  const ipAddress = "192.168.100.5"; // Corrected the IP address format
-  const BASE_URL = "http://192.168.1.8:5000/FOOD-ZONE/";
-  const url = `${BASE_URL}categories`;
-  const response = await fetch(url);
-  const data = await response.json();
-  return data.map(item => new Category(item.id, item.title, item.color));
-};
+import { useGlobalContext } from '../context/globalContext';
 
 function CategoryScreen({ navigation }) {
+
+  const { fetchCategories } = useGlobalContext();
   const [categories, setCategories] = useState([]);
 
+  const route = useRoute();
+  const userId = route.params.collegeID;
+
   useEffect(() => {
+    // console.log("from cat " + userId);
     fetchCategories().then(setCategories);
   }, []);
 
   function renderCategoryItem(itemObject) {
     function pressHandler() {
       navigation.navigate("MealDescription", {
-        CategoryId: itemObject.item.id,
+        CategoryId: itemObject.item.id
       });
     }
 

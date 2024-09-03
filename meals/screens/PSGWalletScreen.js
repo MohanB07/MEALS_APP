@@ -1,20 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Dimensions, Pressable, StyleSheet, Text, View } from 'react-native';
-import { fetchWalletBalance } from '../server/data/api'; // Import the function
+import { useGlobalContext } from '../context/globalContext';
 import Colors from '../utils/Colors';
 
 const ScreenWidth = Dimensions.get('window').width;
 
 function PSGWalletScreen() {
-  const [walletBalance, setWalletBalance] = useState(null); // Use null to differentiate between loading and loaded states
-  const [loading, setLoading] = useState(true); // Loading state
-  const [error, setError] = useState(null); // Error state
+  const [walletBalance, setWalletBalance] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const { fetchWalletBalance, userId, addWalletAmount } = useGlobalContext();
 
   useEffect(() => {
     // Fetch wallet balance when the component mounts
     const loadBalance = async () => {
+      console.log("invoked " + " userId : " + userId );
       try {
-        const balance = await fetchWalletBalance();
+        const balance = await fetchWalletBalance(userId);
         const numericBalance = Number(balance); // Type cast to number
 
         if (!isNaN(numericBalance)) {
