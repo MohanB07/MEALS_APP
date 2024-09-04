@@ -3,7 +3,7 @@ import React, { createContext, useContext, useState } from 'react';
 import Category from '../server/models/category';
 import Meal from '../server/models/meal';
 
-const BASE_URL = "http://192.168.166.81:5000/FOOD-ZONE/";
+const BASE_URL = "http://192.168.1.8:5000/FOOD-ZONE/";
 
 const GlobalContext = createContext();
 
@@ -78,7 +78,6 @@ export const GlobalProvider = ({ children }) => {
 
         const fetchWalletBalance = async (userId) => {
             try {
-                // console.log("from GC userId : " + userId);
                 const response = await axios.get(`${BASE_URL}wallet`, {
                     params: { userId }
                 });
@@ -89,11 +88,12 @@ export const GlobalProvider = ({ children }) => {
             }
         };
 
-        const addWalletAmount = async (amount) => {
+        const addWalletAmount = async (userId, amount) => {
             try {
-                const response = await axios.get(`${BASE_URL}addWalletAmount`, {
-                    amount
-                })
+                const response = await axios.post(`${BASE_URL}addWalletAmount`, {
+                    amount,
+                    userId
+                });
                 return response.data.amount;
             } catch (error) {
                 
@@ -135,7 +135,6 @@ export const GlobalProvider = ({ children }) => {
         };
         
         const captureUserId = (thisUser) => {
-            console.log("GC capturing userId " + thisUser);
             setUserId(thisUser);
         }
 

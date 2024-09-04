@@ -8,6 +8,7 @@ Colours={
     'LinkRed':'#C41E3A',
     'White300':'#FAF9F6',
     'White700':'#E2E8DD',
+    'SuccessGreen': '#9CDBA6'
 
 }
 export default Colours;

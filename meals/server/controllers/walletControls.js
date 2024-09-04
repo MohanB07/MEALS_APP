@@ -27,14 +27,16 @@ exports.walletAmount = async (req, res) => {
 exports.addWalletAmount = async (req, res) => {
     try {
         const {userId, amount} = req.body;
-        db.query('UPDATE wallet set amount = ? WHERE regno = ?', [amount, userId], (err, results) => {
+        const trimmedUserId = userId.trim();
+        
+        db.query('UPDATE wallet set amount = ? WHERE regno = ?', [amount, trimmedUserId], (err, results) => {
             if (err) {
                 console.error('Database query error:', err);
                 return res.status(500).json({ error: 'Database query error' });
             }
             res.json({ amount });
         })
-            
+
     } catch (error) {
         console.error(error);
     }

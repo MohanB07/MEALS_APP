@@ -13,7 +13,6 @@ function CategoryScreen({ navigation }) {
   const userId = route.params.collegeID;
 
   useEffect(() => {
-    // console.log("from cat " + userId);
     fetchCategories().then(setCategories);
   }, []);
 

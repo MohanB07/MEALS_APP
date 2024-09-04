@@ -11,7 +11,7 @@ Router.post("/signup", signup)
     .get("/meals", Meals.meals)
     .get("/categories", Categories.categories)
     .get("/wallet", Wallet.walletAmount)
-    .get("/addWalletAmount", Wallet.addWalletAmount)
+    .post("/addWalletAmount", Wallet.addWalletAmount)
     
     
 
