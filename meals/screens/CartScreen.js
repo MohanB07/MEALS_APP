@@ -7,27 +7,31 @@ import Colors from '../utils/Colors';
 const ScreenWidth = Dimensions.get('window').width;
 
 function CartScreen({ navigation }) {
-    const { cart, addToCart, removeFromCart, clearCart } = useContext(CartContext);
+    const { cart, addToCart, removeFromCart, clearCart, fetchMealsByIds } = useContext(CartContext);
     const [cartItems, setCartItems] = useState([]);
-
-    // Assume a function to fetch meals by their ID
-    const { fetchMealsByIds } = useContext(CartContext); 
 
     useEffect(() => {
         const fetchCartItems = async () => {
             const mealIds = Object.keys(cart);
             if (mealIds.length > 0) {
-                const fetchedMeals = await fetchMealsByIds(mealIds); // Fetch meals based on cart meal IDs
-                const items = fetchedMeals.map(meal => ({
-                    ...meal,
-                    quantity: cart[meal.id],
-                    totalPrice: meal.price * cart[meal.id]
-                }));
+                const items = [];
+                for (const mealId of mealIds) {
+                    const fetchedMeal = await fetchMealsByIds(mealId);
+                    if (fetchedMeal) {
+                        items.push({
+                            ...fetchedMeal,
+                            quantity: cart[mealId],
+                            totalPrice: fetchedMeal.price * cart[mealId]
+                        });
+                    }
+                }
                 setCartItems(items);
+            } else {
+                setCartItems([]);
             }
         };
         fetchCartItems();
-    }, [cart]);
+    }, [cart, fetchMealsByIds]);
 
     // Calculate total price
     const totalPrice = cartItems.reduce((sum, item) => sum + item.totalPrice, 0);
@@ -64,7 +68,7 @@ function CartScreen({ navigation }) {
                 <>
                     <FlatList
                         data={cartItems}
-                        keyExtractor={(item) => item.id}
+                        keyExtractor={(item) => item.id.toString()}
                         renderItem={renderCartItem}
                     />
                     <View style={styles.totalPriceContainer}>

@@ -72,6 +72,7 @@ const HomeScreen = () => {
             try {
                 const savedCollegeID = await AsyncStorage.getItem('collegeID');
                 const savedPassword = await AsyncStorage.getItem('password');
+                console.log(savedCollegeID + " " + savedPassword);
                 if (savedCollegeID && savedPassword) {
                     const valid = await login(savedCollegeID, savedPassword);
                     if (valid === true) {

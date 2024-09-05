@@ -1,15 +1,12 @@
 import React, { createContext, useState } from 'react';
 
-
 async function fetchMealsByIds(mealIds) {
     try {
-        const response = await fetch('http://192.168.57.202:5000/FOOD-ZONE/meals', {
+        const response = await fetch(`http://192.168.1.5:5000/FOOD-ZONE/addMealsById?mealId=${mealIds}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
             },
-            // Use query parameters to send mealIds if needed
-            params: { mealIds } // Note: This syntax is incorrect; you may need to serialize `mealIds` into the URL manually
         });
 
         if (!response.ok) {
@@ -23,12 +20,12 @@ async function fetchMealsByIds(mealIds) {
     }
 }
 
-
 export const CartContext = createContext();
 
 export function CartProvider({ children }) {
     const [cart, setCart] = useState({});
 
+    // Add a meal to the cart
     const addToCart = (mealId, quantity = 1) => {
         setCart((prevCart) => ({
             ...prevCart,
@@ -36,6 +33,7 @@ export function CartProvider({ children }) {
         }));
     };
 
+    // Remove a meal from the cart
     const removeFromCart = (mealId, quantity = 1) => {
         setCart((prevCart) => {
             const updatedCart = { ...prevCart };
@@ -48,12 +46,20 @@ export function CartProvider({ children }) {
         });
     };
 
+    // Clear the entire cart
     const clearCart = () => {
         setCart({});
     };
 
+    // Get items in the cart
+    const getCartItems = async () => {
+        const mealIds = Object.keys(cart);
+        if (mealIds.length === 0) return [];
+        return await fetchMealsByIds(mealIds.join(','));
+    };
+
     return (
-        <CartContext.Provider value={{ cart, addToCart, removeFromCart, clearCart, fetchMealsByIds }}>
+        <CartContext.Provider value={{ cart, addToCart, removeFromCart, clearCart, fetchMealsByIds: getCartItems }}>
             {children}
         </CartContext.Provider>
     );
