@@ -1,6 +1,6 @@
 const db = require('../db.js');
 
-exports.meals = async (req,res) => {
+exports.meals = async (req, res) => {
     try {
         const categoryId = req.query.categoryId;
         const query = categoryId
@@ -9,15 +9,16 @@ exports.meals = async (req,res) => {
 
         db.query(query, [categoryId], (err, results) => {
             if (err) {
-            console.error('Error fetching meals:', err);
-            return res.status(500).json({ error: 'Error fetching meals' });
+                console.error('Error fetching meals:', err);
+                return res.status(500).json({ error: 'Error fetching meals' });
             }
             results.forEach((meal) => {
-            meal.categoryIds = meal.categoryIds ? meal.categoryIds.split(',') : [];
+                meal.categoryIds = meal.categoryIds ? meal.categoryIds.split(',') : [];
             });
             res.json(results);
-            });
+        });
     } catch (error) {
         console.error(error);
+        res.status(500).json({ error: 'Server error' });
     }
-}
+};

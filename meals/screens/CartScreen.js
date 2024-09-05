@@ -1,20 +1,33 @@
-
-import AntDesign from '@expo/vector-icons/AntDesign';
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Dimensions, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import AntDesign from '@expo/vector-icons/AntDesign';
 import { CartContext } from '../context/CartContext';
-import { MEALS } from '../server/data/dummy-data';
 import Colors from '../utils/Colors';
 
 const ScreenWidth = Dimensions.get('window').width;
 
 function CartScreen({ navigation }) {
     const { cart, addToCart, removeFromCart, clearCart } = useContext(CartContext);
+    const [cartItems, setCartItems] = useState([]);
 
-    const cartItems = Object.keys(cart).map((mealId) => {
-        const meal = MEALS.find((meal) => meal.id === mealId);
-        return { ...meal, quantity: cart[mealId], totalPrice: meal.price * cart[mealId] };
-    });
+    // Assume a function to fetch meals by their ID
+    const { fetchMealsByIds } = useContext(CartContext); 
+
+    useEffect(() => {
+        const fetchCartItems = async () => {
+            const mealIds = Object.keys(cart);
+            if (mealIds.length > 0) {
+                const fetchedMeals = await fetchMealsByIds(mealIds); // Fetch meals based on cart meal IDs
+                const items = fetchedMeals.map(meal => ({
+                    ...meal,
+                    quantity: cart[meal.id],
+                    totalPrice: meal.price * cart[meal.id]
+                }));
+                setCartItems(items);
+            }
+        };
+        fetchCartItems();
+    }, [cart]);
 
     // Calculate total price
     const totalPrice = cartItems.reduce((sum, item) => sum + item.totalPrice, 0);
@@ -43,25 +56,33 @@ function CartScreen({ navigation }) {
 
     return (
         <View style={styles.container}>
-            <FlatList
-                data={cartItems}
-                keyExtractor={(item) => item.id}
-                renderItem={renderCartItem}
-            />
-            <View style={styles.totalPriceContainer}>
-                <Text style={styles.totalPriceText}>Total Price: ₹{totalPrice.toFixed(2)}</Text>
-            </View>
-            <View style={styles.buttonContainer}>
-                <Pressable style={styles.clearButton} onPress={clearCart}>
-                    <Text style={styles.clearButtonText}>Clear Cart</Text>
-                </Pressable>
-                <Pressable 
-                    style={styles.confirmButton} 
-                    onPress={() => navigation.navigate('OrderSummary', { cartItems, totalPrice })}
-                >
-                    <Text style={styles.confirmButtonText}>Confirm Order</Text>
-                </Pressable>
-            </View>
+            {cartItems.length === 0 ? (
+                <View style={styles.emptyCartContainer}>
+                    <Text style={styles.emptyCartText}>Your cart is empty.</Text>
+                </View>
+            ) : (
+                <>
+                    <FlatList
+                        data={cartItems}
+                        keyExtractor={(item) => item.id}
+                        renderItem={renderCartItem}
+                    />
+                    <View style={styles.totalPriceContainer}>
+                        <Text style={styles.totalPriceText}>Total Price: ₹{totalPrice.toFixed(2)}</Text>
+                    </View>
+                    <View style={styles.buttonContainer}>
+                        <Pressable style={styles.clearButton} onPress={clearCart}>
+                            <Text style={styles.clearButtonText}>Clear Cart</Text>
+                        </Pressable>
+                        <Pressable
+                            style={styles.confirmButton}
+                            onPress={() => navigation.navigate('OrderSummary', { cartItems, totalPrice })}
+                        >
+                            <Text style={styles.confirmButtonText}>Confirm Order</Text>
+                        </Pressable>
+                    </View>
+                </>
+            )}
         </View>
     );
 }
@@ -91,7 +112,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         width: ScreenWidth / 2,
-        justifyContent: 'space-between', // Ensure buttons are spaced out
+        justifyContent: 'space-between',
     },
     button: {
         backgroundColor: Colors.White700,
@@ -104,7 +125,7 @@ const styles = StyleSheet.create({
         fontFamily: 'Manrope_400Regular',
         fontSize: 16,
         color: 'black',
-        marginHorizontal: 20, // Space between the plus and minus buttons
+        marginHorizontal: 20,
     },
     totalPriceContainer: {
         marginTop: 10,
@@ -115,10 +136,15 @@ const styles = StyleSheet.create({
         fontSize: 18,
         color: 'black',
     },
-    buttonContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginTop: 20,
+    emptyCartContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    emptyCartText: {
+        fontFamily: 'Manrope_700Bold',
+        fontSize: 18,
+        color: 'black',
     },
     clearButton: {
         padding: 10,
@@ -131,8 +157,6 @@ const styles = StyleSheet.create({
         color: Colors.White700,
         fontFamily: 'Manrope_700Bold',
         fontSize: 16,
-        textAlign: 'center',
-        width: '100%',
     },
     confirmButton: {
         padding: 10,
@@ -145,7 +169,5 @@ const styles = StyleSheet.create({
         color: Colors.White700,
         fontFamily: 'Manrope_700Bold',
         fontSize: 16,
-        textAlign: 'center',
-        width: '100%',
     },
 });

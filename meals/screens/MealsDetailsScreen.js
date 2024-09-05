@@ -4,15 +4,13 @@ import { FlatList, ImageBackground, StyleSheet, View } from "react-native";
 import MealItem from "../components/MealItem";
 import { useGlobalContext } from "../context/globalContext";
 
-
 function MealsDetailsScreen({ navigation }) {
     const route = useRoute();
     const catId = route.params.CategoryId;
 
     const [meals, setMeals] = useState([]);
-    const [cart, setCart] = useState({});
-
-    const { fetchMealsByCategory } = useGlobalContext();
+    
+    const { fetchMealsByCategory, addToCart } = useGlobalContext(); // Adjusted to use addToCart
 
     useEffect(() => {
         const fetchMeals = async () => {
@@ -22,18 +20,15 @@ function MealsDetailsScreen({ navigation }) {
         fetchMeals();
     }, [catId]);
 
-    const updateCart = (mealId, quantity) => {
-        setCart((prevCart) => ({
-            ...prevCart,
-            [mealId]: quantity,
-        }));
-    };
-
     useLayoutEffect(() => {
         navigation.setOptions({
             title: route.params.CategoryTitle,
         });
     }, [catId, navigation]);
+
+    const handleUpdateCart = (mealId, quantity) => {
+        addToCart(mealId, quantity); // Use addToCart instead
+    };
 
     function renderMealItems(itemObject) {
         const item = itemObject.item;
@@ -42,7 +37,7 @@ function MealsDetailsScreen({ navigation }) {
             title: item.title,
             imageURL: item.imageUrl,
             price: item.price,
-            updateCart: updateCart,
+            updateCart: handleUpdateCart,
         };
         return <MealItem {...MealItemProps} />;
     }
@@ -50,7 +45,11 @@ function MealsDetailsScreen({ navigation }) {
     return (
         <ImageBackground source={require("../assets/images/psg.jpg")} style={styles.rootContainer} imageStyle={styles.backgroundImage}>
             <View style={styles.rootContainer}>
-                <FlatList data={meals} keyExtractor={(item) => item.id} renderItem={renderMealItems} />
+                <FlatList
+                    data={meals}
+                    keyExtractor={(item) => item.id}
+                    renderItem={renderMealItems}
+                />
             </View>
         </ImageBackground>
     );

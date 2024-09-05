@@ -43,15 +43,28 @@ const HomeScreen = () => {
 
     const Navigation = useNavigation();
     const [modalVisible, setModalVisible] = useState(false);
-    const [collegeID, setCollegeID] = useState(null);
+    const [collegeID, setCollegeID] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     
     const { login, signup, captureUserId } = useGlobalContext();
 
     const handleLogin = async () => {
-        captureUserId(collegeID);
-        await Navigation.navigate('MealsCategory', {collegeID});
+        if (!collegeID || !password) {
+            alert('Please enter both College ID and Password.');
+            return;
+        }
+        const valid = await login(collegeID, password);
+        if (valid === true) {
+            await AsyncStorage.setItem('collegeID', collegeID);
+            await AsyncStorage.setItem('password', password);
+            captureUserId(collegeID);
+            Navigation.navigate('MealsCategory', {collegeID});
+        } else if (valid === 'invalidPWD') {
+            alert('Invalid password. Please try again.');
+        } else {
+            alert("User doesn't exist");
+        }
     };
 
     useEffect(() => {
@@ -63,6 +76,9 @@ const HomeScreen = () => {
                     const valid = await login(savedCollegeID, savedPassword);
                     if (valid === true) {
                         setCollegeID(savedCollegeID);
+                        setPassword(savedPassword);
+                        captureUserId(savedCollegeID);
+                        Navigation.navigate('MealsCategory', {collegeID: savedCollegeID});
                     }
                 }
             } catch (error) {
@@ -73,36 +89,12 @@ const HomeScreen = () => {
         checkSession();
     }, []);
 
-    useEffect(() => {
-        if (collegeID) {
-            captureUserId(collegeID);
-            handleLogin();
-        }
-    }, [collegeID]);
-
     if (!fontsLoaded) {
         return null;
     }
 
     const toggleModal = () => {
         setModalVisible(!modalVisible);
-    };
-
-    const validateLogin = async () => {
-        if (!collegeID || !password) {
-            alert('Please enter both College ID and Password.');
-            return;
-        }
-        const valid = await login(collegeID, password);
-        if (valid === true) {
-            await AsyncStorage.setItem('collegeID', collegeID);
-            await AsyncStorage.setItem('password', password);
-            handleLogin();
-        } else if (valid === 'invalidPWD') {
-            alert('Invalid password. Please try again.');
-        } else {
-            alert("User doesn't exist");
-        }
     };
 
     const createUser = async () => {
@@ -162,7 +154,7 @@ const HomeScreen = () => {
                                         onChangeText={setPassword}
                                     />
                                 </View>
-                                <PsgButton title="Login" onPress={validateLogin} />
+                                <PsgButton title="Login" onPress={handleLogin} />
                                 <Text style={styles.miniText}>
                                     Not a registered user?{' '}
                                     <Text style={styles.signup} onPress={toggleModal}>
@@ -229,6 +221,7 @@ const HomeScreen = () => {
 };
 
 export default HomeScreen;
+
 
     
     const styles = StyleSheet.create({
