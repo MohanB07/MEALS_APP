@@ -2,7 +2,23 @@ import React, { createContext, useState } from 'react';
 
 async function fetchMealsByIds(mealIds) {
     try {
-        const response = await fetch(`http://192.168.1.5:5000/FOOD-ZONE/addMealsById?mealId=${mealIds}`, {
+        console.log("Fetching meals for IDs:", mealIds);  // Debugging statement
+
+        // If mealIds is a string, split it into an array
+        if (typeof mealIds === 'string') {
+            mealIds = mealIds.split(',').map(id => id.trim());
+        }
+
+        // Ensure we have an array at this point
+        if (!Array.isArray(mealIds)) {
+            throw new Error("mealIds should be an array or comma-separated string");
+        }
+
+        // Map mealIds array to query parameters
+        const queryString = mealIds.map(id => `mealId=${id}`).join('&');
+
+        // Fetch the meals with the properly formatted URL
+        const response = await fetch(`http://192.168.57.202:5000/FOOD-ZONE/addMealsById?${queryString}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -10,15 +26,27 @@ async function fetchMealsByIds(mealIds) {
         });
 
         if (!response.ok) {
+            if (response.status === 404) {
+                console.warn(`Meal with ID(s) ${mealIds} not found`);
+            }
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        return await response.json();
+        const data = await response.json();
+
+        if (!data || data.length === 0) {
+            console.warn(`No data received for meal ID(s): ${mealIds}`);
+            return [];
+        }
+
+        return data;
     } catch (error) {
         console.error("Error fetching meals by IDs:", error);
         return [];
     }
 }
+
+
 
 export const CartContext = createContext();
 

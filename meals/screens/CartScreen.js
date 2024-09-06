@@ -14,18 +14,23 @@ function CartScreen({ navigation }) {
         const fetchCartItems = async () => {
             const mealIds = Object.keys(cart);
             if (mealIds.length > 0) {
-                const items = [];
-                for (const mealId of mealIds) {
-                    const fetchedMeal = await fetchMealsByIds(mealId);
-                    if (fetchedMeal) {
-                        items.push({
-                            ...fetchedMeal,
-                            quantity: cart[mealId],
-                            totalPrice: fetchedMeal.price * cart[mealId]
-                        });
+                try {
+                    // Fetch all meals in one go by passing the array of mealIds
+                    const fetchedMeals = await fetchMealsByIds(mealIds);
+                    if (fetchedMeals && fetchedMeals.length > 0) {
+                        const items = fetchedMeals.map(meal => ({
+                            ...meal,
+                            quantity: cart[meal.id],  // Set quantity from cart
+                            totalPrice: meal.price * cart[meal.id],  // Calculate total price
+                        }));
+                        setCartItems(items);
+                    } else {
+                        setCartItems([]);
                     }
+                } catch (error) {
+                    console.error("Error fetching meals by IDs:", error);
+                    setCartItems([]);
                 }
-                setCartItems(items);
             } else {
                 setCartItems([]);
             }
@@ -116,7 +121,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         width: ScreenWidth / 2,
-        justifyContent: 'space-between',
+        justifyContent: 'space-between', // Ensure buttons are spaced out
     },
     button: {
         backgroundColor: Colors.White700,
@@ -129,7 +134,7 @@ const styles = StyleSheet.create({
         fontFamily: 'Manrope_400Regular',
         fontSize: 16,
         color: 'black',
-        marginHorizontal: 20,
+        marginHorizontal: 20, // Space between the plus and minus buttons
     },
     totalPriceContainer: {
         marginTop: 10,
@@ -140,15 +145,10 @@ const styles = StyleSheet.create({
         fontSize: 18,
         color: 'black',
     },
-    emptyCartContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    emptyCartText: {
-        fontFamily: 'Manrope_700Bold',
-        fontSize: 18,
-        color: 'black',
+    buttonContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginTop: 20,
     },
     clearButton: {
         padding: 10,
@@ -161,6 +161,8 @@ const styles = StyleSheet.create({
         color: Colors.White700,
         fontFamily: 'Manrope_700Bold',
         fontSize: 16,
+        textAlign: 'center',
+        width: '100%',
     },
     confirmButton: {
         padding: 10,
@@ -173,5 +175,7 @@ const styles = StyleSheet.create({
         color: Colors.White700,
         fontFamily: 'Manrope_700Bold',
         fontSize: 16,
+        textAlign: 'center',
+        width: '100%',
     },
 });
